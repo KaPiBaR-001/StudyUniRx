@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UniRx;
+using System;
 
 namespace Scenes.InGame.Stick
 {
@@ -15,16 +17,16 @@ namespace Scenes.InGame.Stick
         {
             _stickStatus = GetComponent<StickStatus>();
             _rigidbody2D = GetComponent<Rigidbody2D>();
+            _stickStatus.OnStickStop
+                .Subscribe(_ =>
+                {
+                    StickStop();
+                }).AddTo(this);
         }
 
         void FixedUpdate()
         {
             //TODO:現在はStickMoveが毎回StickStatusに参照しています。この部分をUniRxを使って、値が変わった時だけアクセスするようにしてみましょう
-            if (_stickStatus.IsMovable == false)
-            {
-                _rigidbody2D.velocity = Vector2.zero;
-                return;
-            }
             _velocity = Vector2.zero;
             if (Input.GetKey(KeyCode.LeftArrow))
             {
@@ -39,5 +41,11 @@ namespace Scenes.InGame.Stick
             Vector2 _mooveVelocity = _velocity * _stickStatus.MoveSpeed;
             _rigidbody2D.velocity = _mooveVelocity * Time.fixedDeltaTime * CORRECTIONVALUE;
         }
+
+        private void StickStop()
+        {
+            _rigidbody2D.velocity = Vector2.zero;
+        }
+
     }
 }
