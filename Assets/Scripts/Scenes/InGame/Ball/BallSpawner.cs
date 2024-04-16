@@ -1,4 +1,8 @@
 using UnityEngine;
+using UniRx;
+using System;
+using System.Collections;
+using Scenes.InGame.Manager;
 
 namespace Scenes.InGame.Ball
 {
@@ -11,7 +15,16 @@ namespace Scenes.InGame.Ball
         [SerializeField, Tooltip("スティックからy軸にオフセットする距離")]
         private float _yOffsetDistance = 0.5f;
 
-        //TODO:現在InGameManagerからスポーンさせています。これをInGameManagerからイベントを発行させ、このスクリプト受け取って自分でSpawnさせるように変更しましょう
+        void Start()
+        {
+           InGameManager.Instance.OnSpawn
+          .Subscribe(_ =>
+          {
+              Spawn();
+          }).AddTo(this);
+        }
+
+        //TODO:現在InGameManagerからスポーンさせています。これをInGameManagerからイベントを発行させ、このスクリプト受け取って自分でSpawnさせるように変更しましょう OK
         public void Spawn()
         {
             var Stick = GameObject.FindWithTag("Player");

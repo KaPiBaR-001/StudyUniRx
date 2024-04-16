@@ -4,6 +4,8 @@ using UnityEngine;
 using Scenes.InGame.Ball;
 using Scenes.InGame.Stick;
 using TMPro;
+using UniRx;
+using System;
 
 namespace Scenes.InGame.Manager
 {
@@ -15,6 +17,14 @@ namespace Scenes.InGame.Manager
         public static InGameManager Instance;
         private int _score = 0;//スコア
         private int _blockSize = 0;//blockの数
+
+        private Subject<Unit> Pause = new Subject<Unit>();
+        public IObservable<Unit> OnPause => Pause;
+        private Subject<Unit> Restart = new Subject<Unit>();
+        public IObservable<Unit> OnRestart => Restart;
+        private Subject<Unit> Spawn = new Subject<Unit>();
+        public IObservable<Unit> OnSpawn => Spawn;
+
         [SerializeField,Tooltip("スコアを表示するUI")]
         TextMeshProUGUI _socreText;
         private void Awake()
@@ -34,11 +44,20 @@ namespace Scenes.InGame.Manager
             StartCoroutine(BallSpawn());
         }
 
+        public void GamePause()
+        {
+            Pause.OnNext(default);
+        }
+
+        public void GameRestart()
+        {
+            Restart.OnNext(default);
+        }
        
         IEnumerator BallSpawn()
         {
             yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
-            _ballSpawner.Spawn();
+            Spawn.OnNext(default);
         }
 
         public void GameOver()

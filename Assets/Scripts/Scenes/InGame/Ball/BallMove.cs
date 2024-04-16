@@ -2,6 +2,8 @@ using Scenes.InGame.Manager;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UniRx;
+using System;
 
 namespace Scenes.InGame.Ball
 {
@@ -10,6 +12,7 @@ namespace Scenes.InGame.Ball
     {
         private Rigidbody2D _rigidbody2D;
         private Vector2 _velocity;
+        private Vector2 _pastvelocity;
         [SerializeField, Tooltip("初速")]
         private float _power;
         private BallStatus _ballStatus;
@@ -19,14 +22,34 @@ namespace Scenes.InGame.Ball
             _ballStatus = GetComponent<BallStatus>();
             _velocity = new Vector2(1,1).normalized;
             _rigidbody2D.AddForce(_velocity * _power, ForceMode2D.Impulse);
+            InGameManager.Instance.OnPause
+                .Subscribe(_ =>
+                {
+                    Pause();
+                }).AddTo(this);
+            InGameManager.Instance.OnRestart
+                .Subscribe(_ =>
+                {
+                    Restart();
+                }).AddTo(this);
         }
         //TODO:現在UpdateでずっとBallStatusを参照し続けています。イベント機能を使って、IsMovableの値が変更されたときだけ下の処理を実行するように変更してみましょう
-        private void Update()
+        IEnumerator IsMove()
         {
-            if(_ballStatus.IsMovable == false)
+            while(_ballStatus.IsMovable != false)
             {
-                _rigidbody2D.velocity = Vector2.zero;
+                yield return null;
             }
+            _rigidbody2D.velocity = Vector2.zero;
+        }
+        private void Pause()
+        {
+            _pastvelocity = _rigidbody2D.velocity;
+            _rigidbody2D.velocity = Vector2.zero;
+        }
+        private void Restart()
+        {
+            _rigidbody2D.AddForce(_pastvelocity.normalized * _power, ForceMode2D.Impulse);
         }
         private void OnCollisionEnter2D(Collision2D collision)
         {
