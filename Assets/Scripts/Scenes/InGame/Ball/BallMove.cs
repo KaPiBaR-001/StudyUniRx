@@ -32,8 +32,9 @@ namespace Scenes.InGame.Ball
                 {
                     Restart();
                 }).AddTo(this);
+            StartCoroutine(IsMove());
         }
-        //TODO:現在UpdateでずっとBallStatusを参照し続けています。イベント機能を使って、IsMovableの値が変更されたときだけ下の処理を実行するように変更してみましょう
+        //TODO:現在UpdateでずっとBallStatusを参照し続けています。イベント機能を使って、IsMovableの値が変更されたときだけ下の処理を実行するように変更してみましょう ok
         IEnumerator IsMove()
         {
             while(_ballStatus.IsMovable != false)

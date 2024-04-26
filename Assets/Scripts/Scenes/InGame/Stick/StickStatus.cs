@@ -22,6 +22,7 @@ namespace Scenes.InGame.Stick
         public void StopMove()
         {
             _isMovable = false;
+            StickStop.OnNext(default);
         }
     }
 }
