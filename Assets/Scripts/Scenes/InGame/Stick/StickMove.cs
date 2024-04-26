@@ -4,6 +4,7 @@ using UnityEngine;
 using UniRx;
 using System;
 
+
 namespace Scenes.InGame.Stick
 {
     [RequireComponent(typeof(StickStatus),typeof(Rigidbody2D))]
@@ -20,14 +21,16 @@ namespace Scenes.InGame.Stick
             _stickStatus.OnStickStop
                 .Subscribe(_ =>
                 {
-                    StickStop();
+                   OnValueChanged();
                 }).AddTo(this);
+
         }
 
         void FixedUpdate()
         {
-            //TODO:現在はStickMoveが毎回StickStatusに参照しています。この部分をUniRxを使って、値が変わった時だけアクセスするようにしてみましょう
-            _velocity = Vector2.zero;
+            //TODO:現在はStickMoveが毎回StickStatusに参照しています。この部分をUniRxを使って、値が変わった時だけアクセスするようにしてみましょう ok
+            
+            
             if (Input.GetKey(KeyCode.LeftArrow))
             {
                 _velocity.x--;
@@ -38,13 +41,18 @@ namespace Scenes.InGame.Stick
             }
 
             //TODO:現在はStickMoveが毎回StickStatusに参照しています。この部分をUniRxを使って、値が変わった時だけアクセスするようにしてみましょう
-            Vector2 _mooveVelocity = _velocity * _stickStatus.MoveSpeed;
-            _rigidbody2D.velocity = _mooveVelocity * Time.fixedDeltaTime * CORRECTIONVALUE;
         }
 
-        private void StickStop()
+        void OnValueChanged() // 変数が変わったときの処理
         {
             _rigidbody2D.velocity = Vector2.zero;
+            _velocity = Vector2.zero;
+        }
+
+        void OnValueChanged2()
+        {
+            Vector2 _mooveVelocity = _velocity * _stickStatus.MoveSpeed;
+            _rigidbody2D.velocity = _mooveVelocity * Time.fixedDeltaTime * CORRECTIONVALUE;
         }
 
     }
